@@ -209,29 +209,35 @@
         // Google Apps Script endpoint - NO SECRETS HERE!
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwPILPwdZVTL8iEZOgEoR2MuBfCnSs7UvaV77IGbGwCX26XJC8UUasbUDJCBgNCBM06vA/exec';
 
+
         async function fetchHabitData() {
             const statusEl = document.getElementById('status-message');
 
-            try {
-                const response = await fetch(APPS_SCRIPT_URL);
+            return new Promise((resolve, reject) => {
+                const callbackName = 'handleHabitData';
+                const script = document.createElement('script');
 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
+                window[callbackName] = function (data) {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    statusEl.textContent = 'Data loaded';
+                    setTimeout(() => statusEl.style.opacity = '0', 3000);
+                    resolve(data);
+                };
 
-                const dateMap = await response.json();
+                script.onerror = function () {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    statusEl.textContent = 'Error loading data';
+                    statusEl.classList.add('error');
+                    reject(new Error('Failed to load script'));
+                };
 
-                statusEl.textContent = 'Data loaded';
-                setTimeout(() => statusEl.style.opacity = '0', 3000);
-
-                return dateMap;
-            } catch (error) {
-                console.error('Fetch error:', error);
-                statusEl.textContent = 'Error loading data: ' + error.message;
-                statusEl.classList.add('error');
-                return null;
-            }
+                script.src = `${APPS_SCRIPT_URL}?callback=${callbackName}`;
+                document.body.appendChild(script);
+            });
         }
+
 
         function renderChart(dateMap) {
             if (!dateMap) return;
