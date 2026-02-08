@@ -1,32 +1,34 @@
 <script>
-    // Google Sheets public URL
-    const SHEET_ID = '1rz53WitPQyR8tw_6zgQOLc_Qs3h7ZhMVvWyGtrgu1lI';
-    const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+    // Supabase configuration
+    const SUPABASE_URL = 'https://xrgxxlrgjhhogxmgtxpm.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhyZ3h4bHJnamhob2d4bWd0eHBtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1MzE3ODAsImV4cCI6MjA4NjEwNzc4MH0.VYDzM1D2QKPbLnsJRg6L6ADTilSByG9qlBmLOkQHPos';
 
     async function fetchHabitData() {
         const statusEl = document.getElementById('status-message');
-
+        
         try {
-            const response = await fetch(SHEET_URL);
-            const text = await response.text();
-
-            // Google Sheets returns JSONP, need to parse it
-            const jsonText = text.substring(47, text.length - 2);
-            const data = JSON.parse(jsonText);
-
-            // Convert to dateMap
-            const dateMap = {};
-            data.table.rows.forEach(row => {
-                if (row.c[0] && row.c[1]) {
-                    const date = row.c[0].v; // date
-                    const count = row.c[1].v; // count
-                    dateMap[date] = count;
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/habit_data?select=*`, {
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
                 }
             });
-
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            // Convert to dateMap
+            const dateMap = {};
+            data.forEach(row => {
+                dateMap[row.date] = row.count;
+            });
+            
             statusEl.textContent = 'Data loaded';
             setTimeout(() => statusEl.style.opacity = '0', 3000);
-
+            
             return dateMap;
         } catch (error) {
             console.error('Fetch error:', error);
@@ -80,10 +82,10 @@
                 // Tooltip
                 const tooltip = document.createElement('div');
                 tooltip.className = 'tooltip';
-                const dateFormatted = currentDate.toLocaleDateString(undefined, {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric'
+                const dateFormatted = currentDate.toLocaleDateString(undefined, { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    year: 'numeric' 
                 });
                 tooltip.textContent = `${count} habits on ${dateFormatted}`;
                 cell.appendChild(tooltip);
