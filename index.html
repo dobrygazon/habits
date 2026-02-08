@@ -306,8 +306,10 @@
             }
         }
 
-        // Load and render
-        fetchHabitData().then(renderChart);
+// Load and render when page is ready
+document.addEventListener('DOMContentLoaded', () => {
+    fetchHabitData().then(renderChart);
+});
     </script>
 </body>
 
