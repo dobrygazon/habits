@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notion Habit Contribution Chart</title>
+    <title>Notion Habit Contribution Charts</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -14,10 +14,6 @@
             --text-color: #c9d1d9;
             --muted-color: #8b949e;
             --cell-empty: #161b22;
-            --cell-l1: #0e4429;
-            --cell-l2: #006d32;
-            --cell-l3: #26a641;
-            --cell-l4: #39d353;
             --border-color: #30363d;
             --tooltip-bg: #6e7681;
         }
@@ -25,13 +21,13 @@
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             margin: 0;
-            padding: 10px;
+            padding: 20px;
             background: transparent;
             color: var(--text-color);
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            min-height: 100vh;
+            gap: 20px;
         }
 
         .container {
@@ -40,7 +36,8 @@
             border-radius: 6px;
             padding: 16px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-            display: inline-block;
+            width: 100%;
+            max-width: 900px;
         }
 
         .header {
@@ -49,7 +46,7 @@
             font-weight: 400;
         }
 
-        #contribution-count {
+        .contribution-count {
             font-weight: 600;
         }
 
@@ -101,21 +98,35 @@
             z-index: 10;
         }
 
-        .cell[data-level="1"] {
-            background: var(--cell-l1);
-        }
+        /* STOIC - Green (original GitHub colors) */
+        .stoic .cell[data-level="1"] { background: #0e4429; }
+        .stoic .cell[data-level="2"] { background: #006d32; }
+        .stoic .cell[data-level="3"] { background: #26a641; }
+        .stoic .cell[data-level="4"] { background: #39d353; }
 
-        .cell[data-level="2"] {
-            background: var(--cell-l2);
-        }
+        /* READ - Blue */
+        .read .cell[data-level="1"] { background: #0a3069; }
+        .read .cell[data-level="2"] { background: #0969da; }
+        .read .cell[data-level="3"] { background: #1f6feb; }
+        .read .cell[data-level="4"] { background: #58a6ff; }
 
-        .cell[data-level="3"] {
-            background: var(--cell-l3);
-        }
+        /* AZERI - Purple */
+        .azeri .cell[data-level="1"] { background: #3d1f7a; }
+        .azeri .cell[data-level="2"] { background: #6e40c9; }
+        .azeri .cell[data-level="3"] { background: #8957e5; }
+        .azeri .cell[data-level="4"] { background: #bc8cff; }
 
-        .cell[data-level="4"] {
-            background: var(--cell-l4);
-        }
+        /* STRETCH - Orange */
+        .stretch .cell[data-level="1"] { background: #6f2f00; }
+        .stretch .cell[data-level="2"] { background: #bc4c00; }
+        .stretch .cell[data-level="3"] { background: #e36209; }
+        .stretch .cell[data-level="4"] { background: #fb8500; }
+
+        /* VALKYRIA - Pink */
+        .valkyria .cell[data-level="1"] { background: #6b1f5c; }
+        .valkyria .cell[data-level="2"] { background: #bf3989; }
+        .valkyria .cell[data-level="3"] { background: #e85aad; }
+        .valkyria .cell[data-level="4"] { background: #ff7ac6; }
 
         .footer {
             display: flex;
@@ -159,7 +170,7 @@
             display: block;
         }
 
-        #status-message {
+        .status-message {
             font-size: 12px;
             color: var(--muted-color);
             text-align: center;
@@ -173,9 +184,10 @@
 </head>
 
 <body>
-    <div class="container">
+    <!-- STOIC Chart -->
+    <div class="container stoic">
         <div class="header">
-            <span id="contribution-count">0</span> contributions in the last year
+            <span class="contribution-count" id="stoic-count">0</span> STOIC contributions in the last year
         </div>
         <div class="chart-wrapper">
             <div class="labels-column">
@@ -187,32 +199,151 @@
                 <div class="day-label"></div>
                 <div class="day-label"></div>
             </div>
-            <div class="weeks-container" id="chart">
-                <!-- Weeks will be injected here -->
-            </div>
+            <div class="weeks-container" id="stoic-chart"></div>
         </div>
         <div class="footer">
-            <div id="status-message">Fetching habit data...</div>
+            <div class="status-message" id="stoic-status">Loading...</div>
             <div class="legend">
                 <span>Less</span>
                 <div class="legend-cell" style="background: var(--cell-empty);"></div>
-                <div class="legend-cell" style="background: var(--cell-l1);"></div>
-                <div class="legend-cell" style="background: var(--cell-l2);"></div>
-                <div class="legend-cell" style="background: var(--cell-l3);"></div>
-                <div class="legend-cell" style="background: var(--cell-l4);"></div>
+                <div class="legend-cell" style="background: #0e4429;"></div>
+                <div class="legend-cell" style="background: #006d32;"></div>
+                <div class="legend-cell" style="background: #26a641;"></div>
+                <div class="legend-cell" style="background: #39d353;"></div>
+                <span>More</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- READ Chart -->
+    <div class="container read">
+        <div class="header">
+            <span class="contribution-count" id="read-count">0</span> READ days in the last year
+        </div>
+        <div class="chart-wrapper">
+            <div class="labels-column">
+                <div class="day-label">Mon</div>
+                <div class="day-label"></div>
+                <div class="day-label">Wed</div>
+                <div class="day-label"></div>
+                <div class="day-label">Fri</div>
+                <div class="day-label"></div>
+                <div class="day-label"></div>
+            </div>
+            <div class="weeks-container" id="read-chart"></div>
+        </div>
+        <div class="footer">
+            <div class="status-message" id="read-status">Loading...</div>
+            <div class="legend">
+                <span>Less</span>
+                <div class="legend-cell" style="background: var(--cell-empty);"></div>
+                <div class="legend-cell" style="background: #0a3069;"></div>
+                <div class="legend-cell" style="background: #0969da;"></div>
+                <div class="legend-cell" style="background: #1f6feb;"></div>
+                <div class="legend-cell" style="background: #58a6ff;"></div>
+                <span>More</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- AZERI Chart -->
+    <div class="container azeri">
+        <div class="header">
+            <span class="contribution-count" id="azeri-count">0</span> AZERI days in the last year
+        </div>
+        <div class="chart-wrapper">
+            <div class="labels-column">
+                <div class="day-label">Mon</div>
+                <div class="day-label"></div>
+                <div class="day-label">Wed</div>
+                <div class="day-label"></div>
+                <div class="day-label">Fri</div>
+                <div class="day-label"></div>
+                <div class="day-label"></div>
+            </div>
+            <div class="weeks-container" id="azeri-chart"></div>
+        </div>
+        <div class="footer">
+            <div class="status-message" id="azeri-status">Loading...</div>
+            <div class="legend">
+                <span>Less</span>
+                <div class="legend-cell" style="background: var(--cell-empty);"></div>
+                <div class="legend-cell" style="background: #3d1f7a;"></div>
+                <div class="legend-cell" style="background: #6e40c9;"></div>
+                <div class="legend-cell" style="background: #8957e5;"></div>
+                <div class="legend-cell" style="background: #bc8cff;"></div>
+                <span>More</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- STRETCH Chart -->
+    <div class="container stretch">
+        <div class="header">
+            <span class="contribution-count" id="stretch-count">0</span> STRETCH days in the last year
+        </div>
+        <div class="chart-wrapper">
+            <div class="labels-column">
+                <div class="day-label">Mon</div>
+                <div class="day-label"></div>
+                <div class="day-label">Wed</div>
+                <div class="day-label"></div>
+                <div class="day-label">Fri</div>
+                <div class="day-label"></div>
+                <div class="day-label"></div>
+            </div>
+            <div class="weeks-container" id="stretch-chart"></div>
+        </div>
+        <div class="footer">
+            <div class="status-message" id="stretch-status">Loading...</div>
+            <div class="legend">
+                <span>Less</span>
+                <div class="legend-cell" style="background: var(--cell-empty);"></div>
+                <div class="legend-cell" style="background: #6f2f00;"></div>
+                <div class="legend-cell" style="background: #bc4c00;"></div>
+                <div class="legend-cell" style="background: #e36209;"></div>
+                <div class="legend-cell" style="background: #fb8500;"></div>
+                <span>More</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- VALKYRIA Chart -->
+    <div class="container valkyria">
+        <div class="header">
+            <span class="contribution-count" id="valkyria-count">0</span> VALKYRIA days in the last year
+        </div>
+        <div class="chart-wrapper">
+            <div class="labels-column">
+                <div class="day-label">Mon</div>
+                <div class="day-label"></div>
+                <div class="day-label">Wed</div>
+                <div class="day-label"></div>
+                <div class="day-label">Fri</div>
+                <div class="day-label"></div>
+                <div class="day-label"></div>
+            </div>
+            <div class="weeks-container" id="valkyria-chart"></div>
+        </div>
+        <div class="footer">
+            <div class="status-message" id="valkyria-status">Loading...</div>
+            <div class="legend">
+                <span>Less</span>
+                <div class="legend-cell" style="background: var(--cell-empty);"></div>
+                <div class="legend-cell" style="background: #6b1f5c;"></div>
+                <div class="legend-cell" style="background: #bf3989;"></div>
+                <div class="legend-cell" style="background: #e85aad;"></div>
+                <div class="legend-cell" style="background: #ff7ac6;"></div>
                 <span>More</span>
             </div>
         </div>
     </div>
 
     <script>
-        // Supabase configuration
         const SUPABASE_URL = 'https://xrgxxlrgjhhogxmgtxpm.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhyZ3h4bHJnamhob2d4bWd0eHBtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1MzE3ODAsImV4cCI6MjA4NjEwNzc4MH0.VYDzM1D2QKPbLnsJRg6L6ADTilSByG9qlBmLOkQHPos';
 
-        async function fetchHabitData() {
-            const statusEl = document.getElementById('status-message');
-            
+        async function fetchStoicData() {
             try {
                 const response = await fetch(`${SUPABASE_URL}/rest/v1/habit_data_stoic?select=*`, {
                     headers: {
@@ -221,54 +352,68 @@
                     }
                 });
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 
                 const data = await response.json();
-                
-                // Convert to dateMap
                 const dateMap = {};
                 data.forEach(row => {
                     dateMap[row.date] = row.count;
                 });
                 
-                statusEl.textContent = 'Data loaded';
-                setTimeout(() => statusEl.style.opacity = '0', 3000);
-                
                 return dateMap;
             } catch (error) {
-                console.error('Fetch error:', error);
-                statusEl.textContent = 'Error loading data: ' + error.message;
-                statusEl.classList.add('error');
+                console.error('Stoic fetch error:', error);
                 return null;
             }
         }
 
-        function renderChart(dateMap) {
-            if (!dateMap) return;
+        async function fetchLearningData() {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/habit_data_learning?select=*`, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Learning fetch error:', error);
+                return null;
+            }
+        }
 
-            const chartEl = document.getElementById('chart');
+        function renderChart(chartId, countId, statusId, dateMap, habitName) {
+            const chartEl = document.getElementById(chartId);
+            const countEl = document.getElementById(countId);
+            const statusEl = document.getElementById(statusId);
+            
+            if (!dateMap) {
+                statusEl.textContent = 'Error loading data';
+                statusEl.classList.add('error');
+                return;
+            }
+
             chartEl.innerHTML = '';
 
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
-            // Start from the Monday of the week 52 weeks ago
             const startDate = new Date(today);
             startDate.setDate(today.getDate() - 364);
             while (startDate.getDay() !== 1) {
                 startDate.setDate(startDate.getDate() - 1);
             }
 
-            // Count total habits
-            let totalHabits = 0;
+            let totalCount = 0;
             for (let date in dateMap) {
-                totalHabits += dateMap[date];
+                totalCount += dateMap[date] || 0;
             }
-            document.getElementById('contribution-count').textContent = totalHabits;
+            countEl.textContent = totalCount;
 
-            // Generate 53 weeks
             const currentDate = new Date(startDate);
             for (let w = 0; w < 53; w++) {
                 const weekEl = document.createElement('div');
@@ -278,7 +423,6 @@
                     const cell = document.createElement('div');
                     cell.className = 'cell';
 
-                    // Format date as YYYY-MM-DD in local timezone (not UTC)
                     const year = currentDate.getFullYear();
                     const month = String(currentDate.getMonth() + 1).padStart(2, '0');
                     const day = String(currentDate.getDate()).padStart(2, '0');
@@ -290,7 +434,6 @@
                         cell.setAttribute('data-level', level);
                     }
 
-                    // Tooltip
                     const tooltip = document.createElement('div');
                     tooltip.className = 'tooltip';
                     const dateFormatted = currentDate.toLocaleDateString(undefined, { 
@@ -298,7 +441,7 @@
                         day: 'numeric', 
                         year: 'numeric' 
                     });
-                    tooltip.textContent = `${count} habits on ${dateFormatted}`;
+                    tooltip.textContent = count > 0 ? `${habitName} on ${dateFormatted}` : `No ${habitName} on ${dateFormatted}`;
                     cell.appendChild(tooltip);
 
                     weekEl.appendChild(cell);
@@ -308,12 +451,39 @@
                 }
                 chartEl.appendChild(weekEl);
             }
+
+            statusEl.textContent = 'Data loaded';
+            setTimeout(() => statusEl.style.opacity = '0', 2000);
         }
 
-// Load and render when page is ready
-document.addEventListener('DOMContentLoaded', () => {
-    fetchHabitData().then(renderChart);
-});
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load and render STOIC chart
+            const stoicData = await fetchStoicData();
+            renderChart('stoic-chart', 'stoic-count', 'stoic-status', stoicData, 'habits');
+
+            // Load and render learning charts
+            const learningData = await fetchLearningData();
+            
+            if (learningData) {
+                // Convert learning data to date maps for each habit
+                const readMap = {};
+                const azeriMap = {};
+                const stretchMap = {};
+                const valkyriaMap = {};
+                
+                learningData.forEach(row => {
+                    readMap[row.date] = row.read;
+                    azeriMap[row.date] = row.azeri;
+                    stretchMap[row.date] = row.stretch;
+                    valkyriaMap[row.date] = row.valkyria;
+                });
+
+                renderChart('read-chart', 'read-count', 'read-status', readMap, 'READ');
+                renderChart('azeri-chart', 'azeri-count', 'azeri-status', azeriMap, 'AZERI');
+                renderChart('stretch-chart', 'stretch-count', 'stretch-status', stretchMap, 'STRETCH');
+                renderChart('valkyria-chart', 'valkyria-count', 'valkyria-status', valkyriaMap, 'VALKYRIA');
+            }
+        });
     </script>
 </body>
 
