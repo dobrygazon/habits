@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VALKYRIA Habit Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --text-color: #c9d1d9;
+            --muted-color: #8b949e;
+            --cell-empty: #161b22;
+            --border-color: #30363d;
+            --tooltip-bg: #6e7681;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 10px;
+            background: transparent;
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            display: inline-block;
+        }
+
+        .header {
+            margin-bottom: 12px;
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .contribution-count {
+            font-weight: 600;
+        }
+
+        .chart-wrapper {
+            display: flex;
+            gap: 4px;
+        }
+
+        .labels-column {
+            display: grid;
+            grid-template-rows: repeat(7, 10px);
+            gap: 3px;
+            padding-top: 0;
+        }
+
+        .day-label {
+            font-size: 9px;
+            color: var(--muted-color);
+            text-align: right;
+            padding-right: 4px;
+            height: 10px;
+            line-height: 10px;
+        }
+
+        .weeks-container {
+            display: flex;
+            gap: 3px;
+        }
+
+        .week {
+            display: grid;
+            grid-template-rows: repeat(7, 10px);
+            gap: 3px;
+        }
+
+        .cell {
+            width: 10px;
+            height: 10px;
+            background: var(--cell-empty);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            position: relative;
+        }
+
+        .cell:hover {
+            outline: 1px solid var(--muted-color);
+            transform: scale(1.2);
+            z-index: 10;
+        }
+
+        .cell[data-level="1"] { background: #6b1f5c; }
+        .cell[data-level="2"] { background: #bf3989; }
+        .cell[data-level="3"] { background: #e85aad; }
+        .cell[data-level="4"] { background: #ff7ac6; }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        .legend {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: var(--muted-color);
+        }
+
+        .legend-cell {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+        }
+
+        .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--tooltip-bg);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            white-space: nowrap;
+            display: none;
+            pointer-events: none;
+            margin-bottom: 5px;
+            z-index: 100;
+        }
+
+        .cell:hover .tooltip {
+            display: block;
+        }
+
+        .status-message {
+            font-size: 12px;
+            color: var(--muted-color);
+        }
+
+        .error {
+            color: #f85149 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <span class="contribution-count" id="count">0</span> VALKYRIA days in the last year
+        </div>
+        <div class="chart-wrapper">
+            <div class="labels-column">
+                <div class="day-label">Mon</div>
+                <div class="day-label"></div>
+                <div class="day-label">Wed</div>
+                <div class="day-label"></div>
+                <div class="day-label">Fri</div>
+                <div class="day-label"></div>
+                <div class="day-label"></div>
+            </div>
+            <div class="weeks-container" id="chart"></div>
+        </div>
+        <div class="footer">
+            <div class="status-message" id="status">Loading...</div>
+            <div class="legend">
+                <span>Less</span>
+                <div class="legend-cell" style="background: var(--cell-empty);"></div>
+                <div class="legend-cell" style="background: #6b1f5c;"></div>
+                <div class="legend-cell" style="background: #bf3989;"></div>
+                <div class="legend-cell" style="background: #e85aad;"></div>
+                <div class="legend-cell" style="background: #ff7ac6;"></div>
+                <span>More</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://xrgxxlrgjhhogxmgtxpm.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhyZ3h4bHJnamhob2d4bWd0eHBtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1MzE3ODAsImV4cCI6MjA4NjEwNzc4MH0.VYDzM1D2QKPbLnsJRg6L6ADTilSByG9qlBmLOkQHPos';
+
+        async function fetchData() {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/habit_data_learning?select=*`, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                const dateMap = {};
+                data.forEach(row => {
+                    dateMap[row.date] = row.valkyria;
+                });
+                
+                return dateMap;
+            } catch (error) {
+                console.error('Fetch error:', error);
+                return null;
+            }
+        }
+
+        function renderChart(dateMap) {
+            const chartEl = document.getElementById('chart');
+            const countEl = document.getElementById('count');
+            const statusEl = document.getElementById('status');
+            
+            if (!dateMap) {
+                statusEl.textContent = 'Error loading data';
+                statusEl.classList.add('error');
+                return;
+            }
+
+            chartEl.innerHTML = '';
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const startDate = new Date(today);
+            startDate.setDate(today.getDate() - 364);
+            while (startDate.getDay() !== 1) {
+                startDate.setDate(startDate.getDate() - 1);
+            }
+
+            let totalCount = 0;
+            for (let date in dateMap) {
+                totalCount += dateMap[date] || 0;
+            }
+            countEl.textContent = totalCount;
+
+            const currentDate = new Date(startDate);
+            for (let w = 0; w < 53; w++) {
+                const weekEl = document.createElement('div');
+                weekEl.className = 'week';
+
+                for (let d = 0; d < 7; d++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+
+                    const year = currentDate.getFullYear();
+                    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(currentDate.getDate()).padStart(2, '0');
+                    const dateStr = `${year}-${month}-${day}`;
+                    const count = dateMap[dateStr] || 0;
+
+                    if (count > 0) {
+                        cell.setAttribute('data-level', '1');
+                    }
+
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'tooltip';
+                    const dateFormatted = currentDate.toLocaleDateString(undefined, { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        year: 'numeric' 
+                    });
+                    tooltip.textContent = count > 0 ? `VALKYRIA on ${dateFormatted}` : `No VALKYRIA on ${dateFormatted}`;
+                    cell.appendChild(tooltip);
+
+                    weekEl.appendChild(cell);
+                    currentDate.setDate(currentDate.getDate() + 1);
+
+                    if (currentDate > today && w === 52) break;
+                }
+                chartEl.appendChild(weekEl);
+            }
+
+            statusEl.textContent = 'Data loaded';
+            setTimeout(() => statusEl.style.opacity = '0', 2000);
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const data = await fetchData();
+            renderChart(data);
+        });
+    </script>
+</body>
+
+</html>
